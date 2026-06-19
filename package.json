@@ -1,0 +1,17 @@
+{
+  "name": "mentorai",
+  "version": "1.0.0",
+  "description": "MentorAI — Multi-Agent AI Tutoring Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3500 --open",
+    "build": "vite build",
+    "preview": "vite preview --port 3500"
+  },
+  "devDependencies": {
+    "vite": "^5.3.1"
+  },
+  "keywords": ["ai", "tutoring", "learning", "education"],
+  "author": "MentorAI",
+  "license": "MIT"
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MentorAI — An intelligent multi-agent tutoring platform. Get personalized, real-time mentorship in coding, math, writing, and data science from specialized AI agents available 24/7." />
+  <meta name="theme-color" content="#0D1421" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="MentorAI — AI-Powered Learning Platform" />
+  <meta property="og:description" content="5 specialized AI agents teaching you coding, math, writing & data science. Personalized, adaptive, available 24/7." />
+  <meta property="og:type" content="website" />
+
+  <title>MentorAI — Learn Anything with AI</title>
+
+  <!-- ── CSS ─────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="css/design-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+
+  <!-- CodeMirror (code editor) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+
+  <!-- highlight.js (syntax highlighting in chat) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+
+  <style>
+    /* ── App Boot ─────────────────────────────────────────────── */
+    #app-shell {
+      min-height: 100vh;
+    }
+
+    /* ── CodeMirror Theme Overrides ──────────────────────────── */
+    .CodeMirror {
+      font-family: var(--font-code) !important;
+      font-size: 14px !important;
+      height: 100% !important;
+      background: #1e1e2e !important;
+      color: #cdd6f4 !important;
+    }
+    .CodeMirror-gutters {
+      background: #181825 !important;
+      border-right: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    .CodeMirror-linenumber { color: #585b70 !important; }
+    .CodeMirror-cursor { border-left-color: #89b4fa !important; }
+    .CodeMirror-selected { background: rgba(137,180,250,0.15) !important; }
+
+    /* ── Chat markdown rendering ──────────────────────────────── */
+    .message-bubble p { color: inherit; line-height: var(--leading-relaxed); margin: 0; }
+    .message-bubble strong { color: var(--text-primary); font-weight: 700; }
+    .message-bubble em { font-style: italic; opacity: 0.9; }
+    .message-bubble h2, .message-bubble h3 { font-family: var(--font-heading); color: var(--text-primary); margin: var(--space-3) 0 var(--space-2); }
+    .message-bubble li { padding-left: var(--space-2); }
+    .message-bubble blockquote { border-left: 3px solid var(--color-primary); padding-left: var(--space-4); color: var(--text-muted); margin: var(--space-3) 0; }
+    .message-agent .code-block-wrapper { margin: var(--space-3) 0; }
+    .message-agent pre.code-block-body { font-size: 0.82rem; }
+
+    /* ── Highlight.js in chat ─────────────────────────────────── */
+    .message-bubble .hljs { background: rgba(0,0,0,0.4) !important; padding: var(--space-4) !important; border-radius: 0 0 var(--radius-lg) var(--radius-lg) !important; }
+
+    /* ── Pricing grid responsive ──────────────────────────────── */
+    @media (max-width: 900px) {
+      .pricing-grid { grid-template-columns: 1fr !important; max-width: 400px; margin: 0 auto; }
+    }
+
+    /* ── Landing page full-width ──────────────────────────────── */
+    #landing-view {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Onboarding subject btn focus ───────────────────────────── */
+    .subject-btn:focus { outline: 2px solid var(--color-primary); }
+    .level-btn:focus, .style-btn:focus { outline: 2px solid var(--color-primary); }
+
+    /* ── Marked.js rendered lists ───────────────────────────────── */
+    .message-bubble ul { padding-left: var(--space-4); margin: var(--space-2) 0; }
+    .message-bubble ol { padding-left: var(--space-4); margin: var(--space-2) 0; }
+    .message-bubble li { margin-bottom: var(--space-1); }
+
+    /* ── Glow effects for hero ───────────────────────────────────── */
+    .landing-hero::before { animation: heroGlow 6s ease-in-out infinite; }
+    .landing-hero::after  { animation: heroGlow 8s ease-in-out infinite reverse; }
+
+    /* ── Table styles ────────────────────────────────────────────── */
+    table { width: 100%; }
+    th, td { padding: var(--space-3) var(--space-4); font-size: var(--text-sm); }
+    thead tr { background: rgba(255,255,255,0.02); }
+
+    /* ── Pulse ring on active dot ──────────────────────────────── */
+    .roadmap-node.active .roadmap-node-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ── Loading screen ────────────────────────────────────────── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-base);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-6);
+      z-index: 9999;
+      transition: opacity 0.4s ease;
+    }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
+    .loading-logo {
+      width: 64px; height: 64px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-2xl);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: white;
+      font-family: var(--font-heading);
+      box-shadow: var(--shadow-glow-blue);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .loading-text {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-logo">M</div>
+    <div class="loading-text">MentorAI</div>
+    <div class="spinner"></div>
+    <p style="color:var(--text-muted);font-size:var(--text-sm)">Initializing your AI mentors...</p>
+  </div>
+
+  <!-- App Root -->
+  <div id="app-shell"></div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ── CDN Libraries ───────────────────────────────────────── -->
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
+
+  <!-- marked.js (markdown renderer) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+
+  <!-- highlight.js (syntax highlighting) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+
+  <!-- CodeMirror (code editor) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+
+  <!-- ── App Scripts ────────────────────────────────────────── -->
+  <script src="js/utils.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/charts.js"></script>
+
+  <!-- Pages -->
+  <script src="pages/landing.js"></script>
+  <script src="pages/onboarding.js"></script>
+  <script src="pages/dashboard.js"></script>
+  <script src="pages/chat.js"></script>
+  <script src="pages/editor.js"></script>
+  <script src="pages/learning-path.js"></script>
+  <script src="pages/progress.js"></script>
+  <script src="pages/library.js"></script>
+
+  <!-- App Router (last) -->
+  <script src="js/app.js"></script>
+
+  <script>
+    // Configure marked.js
+    if (typeof marked !== 'undefined') {
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+        highlight(code, lang) {
+          if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(code, { language: lang }).value;
+          }
+          return code;
+        }
+      });
+    }
+
+    // Configure highlight.js
+    if (typeof hljs !== 'undefined') {
+      hljs.configure({ ignoreUnescapedHTML: true });
+    }
+
+    // Hide loading screen once everything is ready
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loading = document.getElementById('loading-screen');
+        if (loading) loading.classList.add('hidden');
+        setTimeout(() => loading?.remove(), 500);
+      }, 600);
+    });
+  </script>
+</body>
+</html>
